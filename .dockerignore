@@ -1,0 +1,4 @@
+cardbot/
+__pycache__/
+data/
+fly.toml
