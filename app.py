@@ -212,6 +212,8 @@ def add_reminder(user_id, message):
         'due_date': due_date_text
     })
 
+    data[user_id]["cards"] = sorted(data[user_id]["cards"], key=lambda x: x["due_date"])
+
     save_data(data)
     set_user_state(user_id, None)
     return f"已新增「{card_name}」的繳費提醒，下次繳費截止日: {due_date_text}"
@@ -251,8 +253,9 @@ def mark_paid(user_id, reminder_id):
         due_date = to_next_month(due_date)
         due_date_text = datetime.strftime(due_date, "%Y-%m-%d")
         data[user_id]["cards"][reminder_id]["due_date"] = due_date_text
-        save_data(data)
         card_name = data[user_id]["cards"][reminder_id]["name"]
+        data[user_id]["cards"] = sorted(data[user_id]["cards"], key=lambda x: x["due_date"])
+        save_data(data)
         return f"好的，已經繳完這個月的{card_name}費用，下次繳費截止日: {due_date_text}"
 
     return "發生錯誤，操作未成功"
@@ -264,13 +267,19 @@ def get_due_reminders():
 
     reminders = []
     for user_id, items in data.items():
+        is_changed = False
         for i, item in enumerate(items["cards"]):
             due_date = datetime.strptime(item['due_date'], '%Y-%m-%d')
             if current_date > due_date + timedelta(days=1):
                 due_date = to_next_month(due_date)
                 data[user_id]["cards"][i]["due_date"] = datetime.strftime(due_date, "%Y-%m-%d")
+                is_changed = True
             if (due_date - current_date).days <= 5:
                 reminders.append((user_id, item["name"], item['due_date']))
+
+        if is_changed:
+            data[user_id]["cards"] = sorted(data[user_id]["cards"],
+                                            key=lambda x: x["due_date"])
 
     save_data(data)
 
