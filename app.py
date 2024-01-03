@@ -32,6 +32,9 @@ from linebot.v3.messaging import (
     TextMessage
 )
 
+from chat import ChatModel
+
+
 app = Flask(__name__)
 
 # get channel_secret and channel_access_token from your environment variable
@@ -57,6 +60,7 @@ if not os.path.exists(DATA_FILE_PATH):
     with open(DATA_FILE_PATH, 'w', encoding="utf-8") as file:
         json.dump({}, file)
 
+gemini_model = ChatModel()
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -107,11 +111,13 @@ def message_text(event):
     elif get_user_state(user_id) == 'mark_paid':
         reply_text = mark_paid(user_id, text)
         set_user_state(user_id, None)
-    else:
+    elif text == "說明":
         reply_text = """- 點選「新增提醒」按鈕可以新增繳費提醒
 - 點選「列出繳費清單」可以列出目前已新增的繳費提醒
 - 點選「刪除提醒」可以刪除已經不需要的繳費提醒
 - 輸入「已繳費」告訴我您已經繳費的項目，會在下個月再度提醒"""
+    else:
+        reply_text = gemini_model.send_message(user_id, text)
 
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
