@@ -20,6 +20,7 @@ Set secrets
 ```bash
 export LINE_CHANNEL_SECRET=your_channel_secret
 export LINE_CHANNEL_ACCESS_TOKEN=your_access_token
+export GOOGLE_API_KEY=your_api_key
 ```
 
 Start development server

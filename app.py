@@ -80,6 +80,7 @@ def callback():
 
     return 'OK'
 
+add_reminder_state = {}
 
 @handler.add(MessageEvent, message=TextMessageContent)
 def message_text(event):
@@ -89,8 +90,9 @@ def message_text(event):
     user_id = event.source.user_id
 
     if text == '新增繳費提醒':
-        reply_text = "請輸入要新增的項目名稱:"
+        reply_text = "請輸入要新增的項目名稱"
         set_user_state(user_id, 'add_reminder')
+        add_reminder_state[user_id] = None
     elif text == '列出繳費清單':
         reminders = get_reminders(user_id)
         reply_text = format_reminders(reminders)
@@ -179,8 +181,6 @@ def to_next_month(date):
     day = min(date.day, calendar.monthrange(year, month)[1])
 
     return datetime(year, month, day)
-
-add_reminder_state = {}
 
 def add_reminder(user_id, message):
     """add reminder"""
